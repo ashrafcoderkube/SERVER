@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# === CONFIG ===
+REMOTE_URI="url"
+DB_NAME="--"
+DUMP_PATH="/tmp/mongobackup"
+
+# === START ===
+echo "📥 Dumping remote MongoDB from $REMOTE_URI ..."
+mongodump --uri="$REMOTE_URI" --db="$DB_NAME" --out="$DUMP_PATH"
+
+if [ $? -ne 0 ]; then
+  echo "❌ Failed to dump the remote database."
+  exit 1
+fi
+
+echo "✅ Dump completed. Restoring to local MongoDB..."
+
+mongorestore --drop --db="$DB_NAME" "$DUMP_PATH/$DB_NAME"
+
+if [ $? -ne 0 ]; then
+  echo "❌ Restore failed."
+  exit 1
+fi
+
+echo "🎉 Database '$DB_NAME' successfully backed up and restored locally!"
